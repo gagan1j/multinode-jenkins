@@ -1,59 +1,58 @@
 pipeline {
     agent any
 
+    environment {
+        APP_NAME = 'your-app-name'
+        GIT_REPO_URL = 'https://github.com/gagan1j/multinode-jenkins'
+    }
+
     stages {
         stage('Checkout SCM') {
             steps {
-                script {
-                    echo 'Checking out the repository...'
-                    checkout scm
-                }
+                echo "Checking out the repository..."
+                checkout scm
             }
         }
 
-        stage('Build') {
+        stage('Install Dependencies') {
             steps {
-                script {
-                    echo 'Installing dependencies...'
-                    sh 'python -m venv venv && source venv/bin/activate && pip install -r requirements.txt'
-                }
+                echo "Installing dependencies..."
+                bat 'pip install -r requirements.txt'
             }
         }
 
         stage('Test') {
             steps {
-                script {
-                    echo 'Running unit tests...'
-                    sh 'pytest tests/'
-                }
+                echo "Running tests..."
+                bat 'python -m unittest discover'
             }
         }
 
         stage('Deploy') {
             steps {
-                script {
-                    echo 'Deploying the application...'
-                    sh 'nohup python app.py &'
-                }
+                echo "Deploying application..."
+                // Add any deployment steps needed for your Flask app here
             }
         }
 
         stage('Run Application') {
             steps {
-                script {
-                    echo 'Starting the application...'
-                    sh 'python app.py'
-                }
+                echo "Running the application..."
+                // Example for running a Flask app on Windows
+                bat 'python app.py'
             }
         }
     }
 
     post {
+        always {
+            echo "Pipeline completed."
+        }
         success {
-            echo 'Pipeline executed successfully!'
+            echo "Build and deployment successful."
         }
         failure {
-            echo 'Pipeline failed. Check the logs for details.'
+            echo "There was a failure during the pipeline execution."
         }
     }
 }
